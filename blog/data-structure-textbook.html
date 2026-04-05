@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I Built a Data Structure That Doesn't Exist in Any Textbook — Ravi Teja Prabhala Venkata</title>
+  <meta name="description" content="On time-decayed popularity, exponential heat equations, and why 'what's hot right now?' needed its own primitive. Introducing HeatMap, a novel probabilistic data structure.">
+  <meta name="author" content="Ravi Teja Prabhala Venkata">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta property="og:title" content="I Built a Data Structure That Doesn't Exist in Any Textbook">
+  <meta property="og:description" content="On time-decayed popularity, exponential heat equations, and why 'what's hot right now?' needed its own primitive.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://thecliffhanger.github.io/blog/data-structure-textbook.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@venusdweller">
+</head>
+<body>
+
+  <section class="article">
+    <div class="container">
+      <a href="../" class="back-link">← Back</a>
+
+      <div class="article-header">
+        <h1>I Built a Data Structure That Doesn't Exist in Any Textbook</h1>
+        <p class="subtitle">And why "what's hot right now?" is harder than it sounds.</p>
+        <div class="meta">April 5, 2026 · ~8 min read</div>
+      </div>
+
+      <p>Every computer science student learns the classics. Bloom filters tell you if something <em>might</em> be in a set. Count-Min Sketch gives you approximate frequencies. HyperLogLog counts unique items. Space-Saving tracks your top-k.</p>
+
+      <p>These are elegant, well-studied, and deeply useful. But a few years ago, I kept running into a question none of them answered cleanly:</p>
+
+      <blockquote><strong>What's popular <em>right now</em>?</strong></blockquote>
+
+      <p>Not what was popular yesterday. Not the all-time count. What's <em>trending at this exact moment</em>.</p>
+
+      <p>There are approximations — sliding windows, decayed counters bolted onto Count-Min Sketch, exponential moving averages computed ad-hoc. But no widely-adopted data structure treats temporal heat as a <strong>first-class concept</strong> with formal guarantees, a clean API, and proven optimality.</p>
+
+      <p>So I built one. I call it <strong>HeatMap</strong>.</p>
+
+      <h2>The Problem</h2>
+
+      <p>Imagine you're building a trending topics engine. A user searches for "ChatGPT" 1,000 times over the past month, and "GPT-5" 200 times in the last hour. Which one is <em>actually</em> trending?</p>
+
+      <p>A simple counter says ChatGPT. Every intuition says GPT-5.</p>
+
+      <p>The difference isn't frequency — it's <strong>recency weighted by frequency</strong>. Old observations should decay. New ones should carry more weight. The mathematical answer is elegant:</p>
+
+      <pre><code>dH/dt = -λ·H + δ(item)</code></pre>
+
+      <p>This is the heat equation from physics, repurposed. Every item has a temperature H that naturally decays over time (rate λ), and spikes when the item is observed (impulse δ). The solution:</p>
+
+      <pre><code>H(t) = H(t₀)·e^(-λ(t-t₀)) + Σ e^(-λ(t-tᵢ))</code></pre>
+
+      <p>Each observation contributes heat, and that contribution decays exponentially. A "half-life" parameter controls how quickly things cool down. Set it to 60 seconds, and an observation from a minute ago is worth half its original value. Set it to 24 hours, and yesterday's spike still matters.</p>
+
+      <p>This isn't a new idea — exponential moving averages are ancient. The gap is that nobody has formalized this as a <em>sketch primitive</em> with error bounds that account for the interaction between decay and hash collisions, then proven it's space-time optimal.</p>
+
+      <h2>How HeatMap Works</h2>
+
+      <p>HeatMap combines the decay model with the Count-Min Sketch paradigm — giving you sublinear space with probabilistic guarantees.</p>
+
+      <pre><code>from heatmap_sketch import HeatMap
+
+hm = HeatMap(half_life_seconds=60.0)
+
+hm.add("GPT-5")        # Heat spikes
+hm.add("ChatGPT")      # Gets some heat too
+
+hm.check("GPT-5")      # Returns current heat value
+hm.top(10)             # Returns 10 hottest items right now
+
+hm.stop()              # Clean up background decay thread</code></pre>
+
+      <p>The structure uses k hash functions to map items into m counter slots. Each slot stores a float — the current heat value. A background thread periodically multiplies all counters by the decay factor α = e<sup>(-λΔt)</sup>.</p>
+
+      <table>
+        <tr><th>Operation</th><th>Complexity</th></tr>
+        <tr><td>add(x)</td><td>O(log(1/δ))</td></tr>
+        <tr><td>check(x)</td><td>O(log(1/δ))</td></tr>
+        <tr><td>decay()</td><td>O(n/ε) or O(1) amortized with lazy decay</td></tr>
+        <tr><td>top(k)</td><td>O(|C| log k)</td></tr>
+      </table>
+
+      <p>Where n is the number of distinct items, ε is the error tolerance, and δ is the failure probability.</p>
+
+      <h2>The Formal Guarantees</h2>
+
+      <p>This is where HeatMap differs from "just add decay to Count-Min." The key results:</p>
+
+      <p><strong>Overestimate property:</strong> For any item x, the estimate Ĥ(x) ≥ H(x) always. HeatMap never undercounts. (Same as Count-Min, but it holds <em>through decay operations</em> — not just adds.)</p>
+
+      <p><strong>Bounded error:</strong> With probability ≥ 1 − δ, the error is ≤ ε · total_heat for all items simultaneously. The proof accounts for how decay interacts with collision noise — decay actually <em>helps</em> by shrinking stale collision contributions.</p>
+
+      <p><strong>Space optimality:</strong> HeatMap uses O((n/ε) · log(1/δ)) space, matching the information-theoretic lower bound (proven via reduction from the INDEX problem in communication complexity) within a constant factor of ~2×.</p>
+
+      <p><strong>Time optimality:</strong> O(log(1/δ)) per query — matching the cell-probe lower bound. Add, check, and query are all optimal.</p>
+
+      <p><strong>Space-time tradeoff:</strong> For constant ε, HeatMap achieves the optimal space × query_time product of O(n · log(1/δ)).</p>
+
+      <p>None of these results exist for "Count-Min with ad-hoc decay" because nobody proved them.</p>
+
+      <h2>How I Tested It</h2>
+
+      <p>I tested against four baselines on realistic workloads:</p>
+
+      <ol>
+        <li><strong>Count-Min Sketch</strong> — the standard frequency sketch, no decay</li>
+        <li><strong>Space-Saving</strong> — classic top-k tracker, no decay</li>
+        <li><strong>Sliding Window</strong> — fixed-size time window counter</li>
+        <li><strong>Exact Decayed Counter</strong> — brute-force ground truth (for validation)</li>
+      </ol>
+
+      <p>The ground truth for "what's actually trending" uses the same exponential decay formula as HeatMap, computed exactly over all observations. This matters — comparing a decay-based structure against a static counter as "truth" tells you nothing.</p>
+
+      <h3>Twitter trending detection</h3>
+      <p><em>(100K tweets, 10K hashtags, 5-min half-life)</em></p>
+
+      <p>HeatMap achieved <strong>99.6% recall@10 and 99.6% precision@10</strong> against the exact decayed ground truth — nearly identifying all 10 currently-bursting hashtags at each checkpoint. Count-Min Sketch and Space-Saving, having no concept of time, were dominated by all-time popular topics that weren't actually trending. The sliding window worked reasonably but required tuning the window size to match the half-life — change the timescale and it breaks. Processed 154K tweets/sec.</p>
+
+      <h3>API bot detection</h3>
+      <p><em>(200K requests, mixed human/bot traffic, 1-min half-life)</em></p>
+
+      <p><strong>100% precision</strong> — zero false positives. The decay model detected <strong>95.8% of bot traffic</strong>, cleanly separating bursty patterns from steady human use. A legitimate user making 2 requests/minute has a low, stable heat. A bot making 100 requests in 10 seconds spikes dramatically. The decay acts as a natural rate limiter — past burstiness fades. Processed 127K requests/sec.</p>
+
+      <h3>Cache hit prediction</h3>
+      <p><em>(500K accesses, working set shifts, 5-min half-life)</em></p>
+
+      <p><strong>99.2% precision@100 and recall@100</strong> against the exact decayed ground truth. HeatMap's top-100 recommendations for what to keep in cache matched what was genuinely hot <em>right now</em>. Items that used to be popular but stopped being accessed dropped out naturally — something a static frequency counter never does.</p>
+
+      <h2>Optimality at a Glance</h2>
+
+      <table>
+        <tr><th>Metric</th><th>Lower Bound</th><th>HeatMap</th><th>Optimal?</th></tr>
+        <tr><td>Space</td><td>Ω((n/ε)·log(1/δ))</td><td>O((n/ε)·log(1/δ))</td><td>✅ Within 2×</td></tr>
+        <tr><td>Query time</td><td>Ω(log(1/δ))</td><td>O(log(1/δ))</td><td>✅ Exact</td></tr>
+        <tr><td>Add time</td><td>Ω(log(1/δ))</td><td>O(log(1/δ))</td><td>✅ Exact</td></tr>
+        <tr><td>Decay time</td><td>Ω(n/ε)</td><td>O(n/ε) or O(1)*</td><td>✅ With lazy</td></tr>
+      </table>
+
+      <p><em>*Lazy decay achieves O(1) amortized when access rate ≪ 1/Δt.</em></p>
+
+      <h2>Why It Matters</h2>
+
+      <p>The difference between HeatMap and "just use a decayed counter" is the difference between a hashmap and a hash table — sure, you can implement one with the other, but the formal guarantees, the optimality proofs, and the standard API are what make it a <em>primitive</em>.</p>
+
+      <p>Existing structures answer nouns: "is it there?" "how many?" "how many unique?" HeatMap answers a verb: "what's trending?" And it does so with provably optimal space and time.</p>
+
+      <h2>Try It</h2>
+
+      <pre><code>pip install heatmap-sketch</code></pre>
+
+      <p><a href="https://github.com/thecliffhanger/heatmap-sketch" target="_blank" rel="noopener">GitHub</a> · <a href="https://pypi.org/project/heatmap-sketch/" target="_blank" rel="noopener">PyPI</a> · 168 tests, zero dependencies, MIT license.</p>
+
+      <p>The full formal analysis — including all proofs, optimality bounds, and benchmark methodology — is available in the <a href="https://github.com/thecliffhanger/heatmap-sketch" target="_blank" rel="noopener">repository</a>.</p>
+
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong> The views, work, and opinions expressed in this article are entirely my own. This project was developed independently on personal time, using personal resources. No proprietary information, insights, or resources from any employer — including Capital One — were used in the research, development, or writing of this article.
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 Ravi Teja Prabhala Venkata</p>
+    </div>
+  </footer>
+
+</body>
+</html>
