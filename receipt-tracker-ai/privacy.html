@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Tracker AI — Privacy Policy</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #1d1d1f;
+        }
+        h1 { font-size: 28px; margin-bottom: 8px; letter-spacing: -0.02em; }
+        h2 { font-size: 20px; margin-top: 32px; }
+        .date { color: #86868b; font-size: 14px; margin-bottom: 32px; }
+        p { margin-bottom: 16px; }
+        ul { margin-bottom: 16px; padding-left: 24px; }
+        li { margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+        th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #d2d2d7; vertical-align: top; }
+        th { background: #f5f5f7; font-weight: 600; }
+        code { background: #f5f5f7; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+        .tldr { background: #f5f5f7; padding: 16px 20px; border-radius: 12px; margin: 24px 0; }
+        .tldr h2 { margin-top: 0; }
+        a { color: #0066cc; }
+        .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #d2d2d7; color: #86868b; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>Privacy Policy</h1>
+    <p class="date">Last updated: July 18, 2026</p>
+
+    <p>Receipt Tracker AI is built privacy-first. This policy describes what data the
+    app collects, how it is used, and the choices you have.</p>
+
+    <div class="tldr">
+        <h2>TL;DR</h2>
+        <ul>
+            <li><strong>Free tier:</strong> All processing happens on your device. Your receipt data never leaves your phone.</li>
+            <li><strong>AI Insights tier (optional, paid):</strong> Only merchant names are sent to our server when you explicitly trigger smart categorization or insights. Receipt totals, dates, and line items stay on-device.</li>
+            <li><strong>No tracking.</strong> We do not track you across apps or websites.</li>
+            <li><strong>No account required.</strong> The app works fully offline.</li>
+        </ul>
+    </div>
+
+    <h2>Data We Store On Your Device</h2>
+    <p>The following data is stored locally in Apple SwiftData on your iPhone:</p>
+    <table>
+        <thead>
+            <tr><th>Data</th><th>Purpose</th><th>Stored Where</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Receipt images (photos, scans)</td><td>For your records and re-review</td><td>App Documents directory</td></tr>
+            <tr><td>Extracted text (merchant, date, total, line items)</td><td>Receipt details</td><td>SwiftData database</td></tr>
+            <tr><td>Category assignment (business/personal, category code)</td><td>Tax export &amp; dashboard</td><td>SwiftData database</td></tr>
+            <tr><td>Onboarding state, category profile, display preferences</td><td>Remember your settings</td><td>UserDefaults</td></tr>
+        </tbody>
+    </table>
+    <p>None of this data is sent anywhere by default. It remains on your device until
+    you delete it (Settings &rarr; Delete All Data) or export it yourself (Settings &rarr;
+    Export All Data as JSON).</p>
+
+    <h2>Optional AI Insights (Paid Tier)</h2>
+    <p>If you subscribe to <strong>AI Insights</strong> (Monthly or Annual), the app may contact
+    our server to provide:</p>
+    <ul>
+        <li><strong>Smart categorization</strong> &mdash; sends the merchant name only.</li>
+        <li><strong>Monthly spending summary</strong> &mdash; sends merchant names, totals, and category codes for the month being summarized.</li>
+        <li><strong>Tax optimization suggestions</strong> &mdash; sends year-to-date category totals and receipt counts (no merchant names, no individual receipt details).</li>
+    </ul>
+    <p><strong>Authentication:</strong> Every server request includes your StoreKit 2 purchase
+    token (JWS) to verify your subscription. This token is validated server-side
+    and not used for tracking or advertising.</p>
+    <p><strong>The server does NOT receive:</strong></p>
+    <ul>
+        <li>Receipt images</li>
+        <li>Full line-item details</li>
+        <li>Your personal name, email, or contact info</li>
+        <li>Precise locations</li>
+        <li>Any data from the free tier</li>
+    </ul>
+    <p>The AI Insights feature is <strong>opt-in by subscription</strong>. If you do not
+    subscribe, no network requests are made.</p>
+
+    <h2>Data We Do Not Collect</h2>
+    <ul>
+        <li><strong>No analytics.</strong> We do not use analytics SDKs (no Firebase, no Mixpanel, no Amplitude). We cannot see what you tap, when you open the app, or what you scan.</li>
+        <li><strong>No advertising identifiers.</strong> We do not access IDFA or any advertising identifier.</li>
+        <li><strong>No crash reporting that identifies you.</strong> If you opt into Apple's built-in crash reporting via iOS Settings, that is governed by Apple's privacy policy, not ours.</li>
+        <li><strong>No third-party SDKs.</strong> The app uses only Apple frameworks (SwiftUI, SwiftData, Vision, VisionKit, StoreKit).</li>
+    </ul>
+
+    <h2>Data Storage &amp; Security</h2>
+    <ul>
+        <li>All on-device data is protected by iOS's built-in data protection (<code>NSFileProtectionComplete</code> for receipt images).</li>
+        <li>Server requests (AI Insights only) use HTTPS/TLS encryption.</li>
+        <li>The server stores no persistent user data; requests are processed in memory and discarded.</li>
+    </ul>
+
+    <h2>Your Rights</h2>
+    <p>You have full control over your data:</p>
+    <ul>
+        <li><strong>Access:</strong> Open the app &mdash; all your data is visible to you.</li>
+        <li><strong>Export:</strong> Settings &rarr; Export All Data (JSON) creates a portable backup.</li>
+        <li><strong>Delete:</strong> Settings &rarr; Delete All Data permanently removes all receipts and images from your device.</li>
+        <li><strong>Unsubscribe:</strong> Manage Subscription in Settings or via the App Store app.</li>
+    </ul>
+
+    <h2>Children's Privacy</h2>
+    <p>The app is not directed at children under 13 and we do not knowingly collect
+    data from children. Receipt tracking is a general productivity use case.</p>
+
+    <h2>International Users</h2>
+    <p>Because all free-tier data stays on your device, GDPR and CCPA data-residency
+    concerns do not apply to the free tier. For AI Insights subscribers, server
+    processing is transient and no personal data is retained.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>We will update this policy if the app's data practices change. Material
+    changes will be noted in the app's release notes and in this document's
+    "Last updated" date.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about privacy? Open an issue at
+    <a href="https://github.com/thecliffhanger/receipt-tracker-ai">github.com/thecliffhanger/receipt-tracker-ai</a>
+    or email <a href="mailto:support@receipttracker.ai?subject=Receipt%20Tracker%20Privacy">support@receipttracker.ai</a>.</p>
+
+    <div class="footer">
+        &larr; <a href="./">Receipt Tracker AI</a>
+    </div>
+</body>
+</html>
