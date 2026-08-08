@@ -111,7 +111,7 @@ img { max-width: 100%; }
 .hero-stats {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   background: rgba(255,255,255,0.04);
   border-top: 1px solid rgba(255,255,255,0.08);
   padding: 36px 0;
@@ -229,6 +229,8 @@ img { max-width: 100%; }
   margin-bottom: 20px;
 }
 
+.conference-card h3 a { color: #1a1a2e; }
+.conference-card h3 a:hover { text-decoration: underline; color: #1a5276; }
 .conference-card h3 {
   font-size: 1.2rem;
   font-weight: 700;
