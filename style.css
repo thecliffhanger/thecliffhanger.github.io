@@ -176,6 +176,10 @@ img { max-width: 100%; }
   max-width: 500px;
 }
 
+.section-header p.wide {
+  max-width: none;
+}
+
 .section--dark .section-header p {
   color: #8892b0;
 }
