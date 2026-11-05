@@ -241,8 +241,14 @@ img { max-width: 100%; }
   margin-bottom: 20px;
 }
 
-.conference-card h3 a { color: #1a1a2e; }
-.conference-card h3 a:hover { text-decoration: underline; color: #2563eb; }
+.conference-card h3 a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-color: rgba(37, 99, 235, 0.35);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.conference-card h3 a:hover { color: #1d4ed8; text-decoration-color: #1d4ed8; }
 .conference-card h3 {
   font-size: 1.2rem;
   font-weight: 700;
@@ -319,6 +325,14 @@ img { max-width: 100%; }
   color: #444;
   margin: 0;
 }
+
+.session-item a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.session-item a:hover { color: #1d4ed8; }
 
 /* === Research Cards === */
 .research-grid {
